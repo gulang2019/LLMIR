@@ -1,0 +1,9 @@
+[submodule "3rdparty/MultiPL-E"]
+	path = 3rdparty/MultiPL-E
+	url = https://github.com/nuprl/MultiPL-E.git
+[submodule "3rdparty/open-r1"]
+	path = 3rdparty/open-r1
+	url = https://github.com/huggingface/open-r1.git
+[submodule "3rdparty/trl"]
+	path = 3rdparty/trl
+	url = https://github.com/huggingface/trl.git

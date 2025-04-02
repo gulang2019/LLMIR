@@ -1,0 +1,33 @@
+# Core
+torch==2.5.1
+transformers==4.37.2
+datasets==2.17.0
+accelerate==0.27.2
+tokenizers==0.15.1
+
+# RL support
+trl==0.7.10  # PPO/RLHF toolkit from HuggingFace
+
+# DeepSpeed (for multi-GPU training)
+deepspeed==0.14.4
+
+# Code evaluation
+nltk==3.8.1            # BLEU, tokenization
+evaluate==0.4.1        # Unified HF metric interface
+GitPython==3.1.41      # For dynamic code execution tracking
+
+# Optional: embeddings for CodeBERT similarity
+sentence-transformers==2.2.2
+
+# Logging & visualization
+tqdm==4.66.2
+wandb==0.19.8
+
+# Dev utils
+ipython
+jupyter
+
+# extra dependencies
+latex2sympy2_extended
+math_verify
+flash_attn
