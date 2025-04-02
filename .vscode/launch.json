@@ -1,0 +1,15 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Python: Debug LLMIR/grpo.py",
+        "type": "debugpy",
+        "request": "launch",
+        "program": "${workspaceFolder}/LLMIR/grpo.py",
+        "args": ["--config", "configs/config.yaml"],
+        "console": "integratedTerminal",
+        "justMyCode": false
+      }
+    ]
+  }
+  
