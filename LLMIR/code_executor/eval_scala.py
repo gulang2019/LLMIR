@@ -1,6 +1,6 @@
 from pathlib import Path
 import tempfile
-from safe_subprocess import run
+from .safe_subprocess import run
 
 LANG_NAME = "Scala"
 LANG_EXT = ".scala"

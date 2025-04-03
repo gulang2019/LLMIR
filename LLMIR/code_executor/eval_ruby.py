@@ -2,7 +2,7 @@ import argparse
 from sys import exit
 import subprocess
 from pathlib import Path
-from generic_eval import main as gmain
+from .generic_eval import main as gmain
 
 def eval_script(path: Path):
     try:

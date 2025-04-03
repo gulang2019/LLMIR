@@ -1,5 +1,5 @@
 from pathlib import Path
-from safe_subprocess import run
+from .safe_subprocess import run
 
 def eval_script(path): 
     # Matlab has the requirement that all functions must appear at the end 

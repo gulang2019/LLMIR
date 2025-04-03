@@ -1,4 +1,4 @@
-from safe_subprocess import run
+from .safe_subprocess import run
 from pathlib import Path
 
 def eval_script(path: Path):

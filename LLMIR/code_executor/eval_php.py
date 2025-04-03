@@ -1,5 +1,5 @@
 from pathlib import Path
-from safe_subprocess import run
+from .safe_subprocess import run
 
 LANG_NAME = "PHP"
 LANG_EXT = ".php"

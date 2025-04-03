@@ -3,8 +3,8 @@ Evaluates a generated Clojure program (.clj).
 """
 import os
 from pathlib import Path
-from safe_subprocess import run
-from libeval import run_without_exn
+from .safe_subprocess import run
+from .libeval import run_without_exn
 
 
 def eval_script(path: Path):

@@ -1,4 +1,4 @@
-from safe_subprocess import run
+from .safe_subprocess import run
 import time
 from pathlib import Path
 

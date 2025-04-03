@@ -4,31 +4,34 @@ for problem_evaluator.py.
 """
 
 from pathlib import Path
-import eval_adb
-import eval_ruby
-import eval_lua
-import eval_python
-import eval_rust
-import eval_julia
-import eval_java
-import eval_lua
-import eval_racket
-import eval_javascript
-import eval_swift
-import eval_cpp
-import eval_php
-import eval_dlang
-import eval_julia
-import eval_r
-import eval_fs
-import eval_ocaml
-import eval_matlab
-import eval_hs
-import eval_elixir
-import eval_clj
-import eval_v
-import eval_lean
-import eval_dart
+
+from . import (
+ eval_adb,
+ eval_ruby,
+ eval_lua,
+ eval_python,
+ eval_rust,
+ eval_julia,
+ eval_java,
+ eval_lua,
+ eval_racket,
+ eval_javascript,
+ eval_swift,
+ eval_cpp,
+ eval_php,
+ eval_dlang,
+ eval_julia,
+ eval_r,
+ eval_fs,
+ eval_ocaml,
+ eval_matlab,
+ eval_hs,
+ eval_elixir,
+ eval_clj,
+ eval_v,
+ eval_lean,
+ eval_dart
+)
 import tempfile
 
 

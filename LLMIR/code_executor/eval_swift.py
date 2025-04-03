@@ -1,7 +1,7 @@
 import subprocess
 from pathlib import Path
 import os
-from safe_subprocess import run
+from .safe_subprocess import run
 
 def eval_script(path: Path):
     basename = ".".join(str(path).split(".")[:-1])

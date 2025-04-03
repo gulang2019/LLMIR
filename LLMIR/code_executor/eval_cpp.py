@@ -1,6 +1,6 @@
 from pathlib import Path
-from safe_subprocess import run
-from generic_eval import main
+from .safe_subprocess import run
+from .generic_eval import main
 
 LANG_NAME = "C++"
 LANG_EXT = ".cpp"

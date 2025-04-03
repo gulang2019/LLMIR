@@ -76,11 +76,13 @@ class DataPoint:
     lsfs: List[LSF]
     
     @staticmethod
-    def from_dict(d) -> 'DataPoint':
+    def from_dict(d, languages: dict | None = None) -> 'DataPoint':
+        from .code_executor.containerized_eval import EVALUATORS
         return DataPoint(
             name=d['name'],
             problem=d['problem'],
-            lsfs=[LSF(**lsf) for lsf in d['lsfs']]
+            lsfs=[LSF(**lsf) for lsf in d['lsfs'] if (lsf['lang'] in EVALUATORS and\
+                (languages is None or lsf['lang'] in languages))]
         )
     
 @dataclass

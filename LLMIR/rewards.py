@@ -463,14 +463,14 @@ def code_reward(completions, num_parallel: int = 2, **kwargs) -> list[float]:
 
 
 def code_execution_reward(
-    prompts, completions, tests, lang, num_parallel: int = 8, **kwargs):
-    from code_executor.containerized_eval import eval_string_script
+    prompts, completions, tests, lang, header_lang, num_parallel: int = 8, **kwargs):
+    from .code_executor.containerized_eval import eval_string_script
     from concurrent.futures import ThreadPoolExecutor
     lang_codes = []
-    for _, completion, test, _lang in zip(prompts, \
-        completions, tests, lang):
-        code:str = completion + test
-        lang_codes.append((_lang.value, code))
+    for _, completion, test, _lang, _header_lang in zip(prompts, \
+        completions, tests, lang, header_lang):
+        code:str = _header_lang + completion + test
+        lang_codes.append((_lang, code))
     
     '''
     {
@@ -489,9 +489,13 @@ def code_execution_reward(
     }
     
     with ThreadPoolExecutor(max_workers=num_parallel) as executor:
+        # try: 
         results = list(executor.map(lambda x: eval_string_script(\
             x[0], x[1]), lang_codes))
         rewards = [status_to_reward[x['status']] for x in results]
+        # except:
+        #     print('error running ', lang_codes)
+        #     rewards = [-1 for x in results]
     return rewards
 
         

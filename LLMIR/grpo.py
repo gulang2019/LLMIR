@@ -17,7 +17,7 @@ import os
 import sys
 
 from dataclasses import dataclass, field
-from typing import Optional
+from typing import Optional, List
 import datasets
 import torch
 import transformers
@@ -78,7 +78,8 @@ def main(script_args, training_args, model_args, llmir_args):
     # Load the dataset
     # dataset = load_dataset(script_args.dataset_name, name=script_args.dataset_config)
     from LLMIR.data_loader import load_and_convert_to_hf
-    dataset = load_and_convert_to_hf(dataset_path=script_args.dataset_name)
+    dataset = load_and_convert_to_hf(dataset_path=script_args.dataset_name, 
+                                     languages = llmir_args.languages)
     
     ################
     # Load tokenizer
@@ -94,19 +95,19 @@ def main(script_args, training_args, model_args, llmir_args):
     dataset = dataset.map(add_prefix_surfix)
 
     # Format into conversation
-    def make_conversation(example, prompt_column: str = script_args.dataset_prompt_column):
-        prompt = []
+    # def make_conversation(example, prompt_column: str = script_args.dataset_prompt_column):
+    #     prompt = []
 
-        if training_args.system_prompt is not None:
-            prompt.append({"role": "system", "content": training_args.system_prompt})
+    #     if training_args.system_prompt is not None:
+    #         prompt.append({"role": "system", "content": training_args.system_prompt})
 
-        if prompt_column not in example:
-            raise ValueError(f"Dataset Question Field Error: {prompt_column} is not supported.")
+    #     if prompt_column not in example:
+    #         raise ValueError(f"Dataset Question Field Error: {prompt_column} is not supported.")
 
-        prompt.append({"role": "user", "content": example[prompt_column]})
-        return {"prompt": prompt}
+    #     prompt.append({"role": "user", "content": example[prompt_column]})
+    #     return {"prompt": prompt}
 
-    dataset = dataset.map(make_conversation)
+    # dataset = dataset.map(make_conversation)
 
     for split in dataset:
         if "messages" in dataset[split].column_names:
@@ -200,6 +201,10 @@ class LLMIRConfig:
     
     problem_surfix: Optional[str] = field(
         default = "" 
+    )
+    
+    languages: Optional[list[str]] = field(
+        default = None
     )
 
 

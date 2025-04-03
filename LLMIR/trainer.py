@@ -43,10 +43,8 @@ def nanstd(tensor: torch.Tensor) -> torch.Tensor:
     return torch.sqrt(variance)
 
 
+
 class LLMIRTrainer(GRPOTrainer):
-    def __init__(self, *args, **kwargs):
-        super(LLMIRTrainer, self).__init__(*args, **kwargs)
-        self.generation_config.stop_strings = '```'
 
     def _extract_code(self, text: str) -> str:
         # idx = text.find('```')
@@ -58,7 +56,8 @@ class LLMIRTrainer(GRPOTrainer):
 
     def _generate(
         self,
-        prompts: List[str]  
+        prompts: List[str],
+        stop_tokens: None | List[str] = None 
     ):
         device = self.accelerator.device
         prompts_text = prompts# [maybe_apply_chat_template(example, self.processing_class)["prompt"] for example in prompts]
@@ -86,6 +85,7 @@ class LLMIRTrainer(GRPOTrainer):
                 # num_generations outputs for each one. This is faster than generating outputs for each duplicate
                 # prompt individually.
                 ordered_set_of_prompts = all_prompts_text[:: self.num_generations]
+                from .utils import guided_decoding_regex
                 with profiling_context(self, "vLLM.generate"):
                     completion_ids = self.vllm_client.generate(
                         prompts=ordered_set_of_prompts,
@@ -96,7 +96,7 @@ class LLMIRTrainer(GRPOTrainer):
                         top_k=-1 if self.top_k is None else self.top_k,
                         min_p=0.0 if self.min_p is None else self.min_p,
                         max_tokens=self.max_completion_length,
-                        guided_decoding_regex=self.guided_decoding_regex
+                        guided_decoding_regex=self.guided_decoding_regex if stop_tokens is None else guided_decoding_regex(stop_tokens)
                     )
             else:
                 completion_ids = [None] * len(all_prompts_text)
@@ -118,9 +118,13 @@ class LLMIRTrainer(GRPOTrainer):
             with unwrap_model_for_generation(
                 self.model_wrapped, self.accelerator, gather_deepspeed3_params=self.args.ds3_gather_for_generation
             ) as unwrapped_model:
+                if stop_tokens is not None:
+                    self.generation_config.stop_strings = stop_tokens
                 prompt_completion_ids = unwrapped_model.generate(
-                    prompt_ids, attention_mask=prompt_mask, generation_config=self.generation_config, tokenizer = self.processing_class
+                    prompt_ids, attention_mask=prompt_mask, generation_config=self.generation_config, 
+                    tokenizer = self.processing_class
                 )
+                self.generation_config.stop_strings = None
 
             # Compute prompt length and extract completion ids
             prompt_length = prompt_ids.size(1)
@@ -146,13 +150,15 @@ class LLMIRTrainer(GRPOTrainer):
         irs = [self._extract_code(text) for text in irs_text]
         
         headers = [x["header"] for x in inputs]
+        header_langs = [x['header_lang'] for x in inputs]
+        stop_tokens = list(set(sum([x['stop_tokens'] for x in inputs], start = [])))
         assert len(irs) == len(headers)
-        prompts = [f'```IR\n{ir}```\n{header}' for ir, header in zip(irs, headers)]
+        prompts = [f'```IR\n{ir}```\n{header}\n\n{header_lang}' for ir, header, header_lang in zip(irs, headers, header_langs)]
         
         _num_generations = self.num_generations
         self.num_generations = 1
         prompt_completion_ids, prompts_text, prompt_ids, prompt_mask,\
-            completion_ids, completion_mask = self._generate(prompts)
+            completion_ids, completion_mask = self._generate(prompts, stop_tokens = stop_tokens)
         self.num_generations = _num_generations
         
         attention_mask = torch.cat([prompt_mask, completion_mask], dim=1)  # (B, P+C)
@@ -182,6 +188,15 @@ class LLMIRTrainer(GRPOTrainer):
 
         # Decode the generated completions
         completions_text = self.processing_class.batch_decode(completion_ids, skip_special_tokens=True)
+        
+        if stop_tokens is not None:
+            def remove_surfix(s: str):
+                for stop_token in stop_tokens:
+                    if s.endswith(stop_token):
+                        return s[: -len(stop_token)]
+                return s
+            completions_text = list(map(remove_surfix, completions_text))
+            
         if is_conversational(inputs[0]):
             completions = []
             for prompt, completion in zip(prompts, completions_text):

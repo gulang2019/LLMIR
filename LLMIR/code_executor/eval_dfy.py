@@ -1,5 +1,5 @@
 from pathlib import Path
-from safe_subprocess import run
+from .safe_subprocess import run
 
 # 0 – success
 # 1 – invalid command-line arguments
