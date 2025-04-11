@@ -108,8 +108,7 @@ def load_raw_data_from_json(filepath) -> List[RawDatapoint]:
         raw_datapoints.append(raw_datapoint)
     return raw_datapoints
     
-def _process_raw_data(langs: List[Language], datasets: List[str]):
-    raw_dir = 'assets/raw'
+def _process_raw_data(langs: List[Language], datasets: List[str], raw_dir: str):
     all_datapoints = []
     for dataset in datasets:
         nl_dataset_path = f'{raw_dir}/{dataset}-nl-transform.jsonl'
@@ -148,7 +147,7 @@ def _process_raw_data(langs: List[Language], datasets: List[str]):
         all_datapoints.extend(datapoints)
     return all_datapoints
 
-def process_raw_data():
+def process_raw_data(data_dir, output):
 
     datapoints = _process_raw_data([
         Language.PYTHON,
@@ -175,16 +174,17 @@ def process_raw_data():
         Language.ELIXIR,
         Language.CLOJURE,
         Language.ADA
-    ], ['humaneval', 'mbpp', 'leetcode'])
+    ], ['humaneval', 'mbpp', 'leetcode'],
+                                   data_dir)
 
     # store the datapoint into json
     import json 
-    with open('assets/data.jsonl', "w", encoding="utf-8") as f:
+    with open(output, "w", encoding="utf-8") as f:
         for dp in datapoints:
             f.write(json.dumps(asdict(dp)) + "\n")
             
-def data_investigation():
-    data_path = 'assets/data.jsonl'
+def data_investigation(output):
+    data_path = output
     with open(data_path, 'r') as f:
         data = f.readlines()
     print(len(data))
@@ -209,9 +209,14 @@ def data_investigation():
     n_lanaguages = [len(dp.lsfs) for dp in dps]
     print('#Data:', len(data))
     names = [dp.name for dp in dps]
-    print(names)
+    # print(names)
     print('Languages in total', len(Language.__members__))
     print('Number of languages:', np.mean(n_lanaguages), '+-', np.std(n_lanaguages))
 if __name__ == '__main__':
-    process_raw_data()
-    data_investigation()
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument('--data-dir', type=str, default='assets/raw')
+    parser.add_argument('--output', type=str, default='assets/data.jsonl')
+    args = parser.parse_args()
+    process_raw_data(args.data_dir, args.output)
+    data_investigation(args.output)
